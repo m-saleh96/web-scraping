@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 use Goutte\Client;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 use function PHPSTORM_META\type;
 
@@ -49,7 +50,7 @@ class WebScraping extends Command
                     $details = $a->filter('.postDet')->children();
                     $title = $details->eq(0)->text();
                     $info = $details->eq(1)->text();
-                    $address = $details->eq(2)->text();
+                    $address = $details->eq(2)->filter('span')->text();
                     $price = $details->eq(3)->filter('.postPrice')->text();
                     $image = $a->filter('img')->attr('src');
 
@@ -59,13 +60,23 @@ class WebScraping extends Command
                     $innerData['address'] = $address;
                     $innerData['price'] = $price;
 
+                    DB::table('data')->insert([
+                        'image' => $image,
+                        'title' => $title,
+                        'info' => $info,
+                        'address' => $address,
+                        'price' => $price,
+                        'created_at' =>now()
+                    ]
+                    );
+
                     $data[] = $innerData;
 
                 }
 
             });
 
-            dd($data);
+            // dd($data);
 
 
         });
